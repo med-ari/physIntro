@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Física PAES — El Laboratorio Cero</title>
+<style>
+/* Estilos Base y Scroll */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;color:#f0f0f0;overflow-x:hidden;overflow-y:auto}
+
+/* SLIDES */
+.slide{display:none;min-height:100vh;padding:60px 80px 120px;flex-direction:column;justify-content:center}
+.slide.active{display:flex}
+
+/* PORTADA */
+#s0{align-items:center;text-align:center}
+#s0 .big{font-size:50px;font-weight:700;color:#fff;line-height:1.1;margin-bottom:14px}
+#s0 .sub{font-size:20px;color:#94a3b8;margin-bottom:10px}
+#s0 .context{font-size:16px;color:#94a3b8;max-width:680px;line-height:1.7;margin-top:24px}
+#s0 .tag{display:inline-block;background:#1e293b;border:1px solid #334155;border-radius:6px;padding:6px 18px;font-size:14px;color:#94a3b8;margin-top:20px}
+
+/* HEADERS */
+.seg-bar{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.seg-badge{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 14px;border-radius:20px}
+.seg-time{font-size:13px;color:#64748b}
+h2{font-size:32px;font-weight:700;color:#fff;margin-bottom:22px;line-height:1.2}
+
+/* CARDS */
+.parts{display:grid;gap:14px}
+.part{border-radius:10px;padding:18px 22px}
+.part-label{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.part p{font-size:15px;line-height:1.65;color:#e2e8f0;margin-bottom:8px}
+.part ul{padding-left:20px;margin-top:6px}
+.part li{font-size:14px;line-height:1.7;color:#cbd5e1;margin-bottom:6px}
+
+/* PREGUNTA OFICIAL PAES */
+.paes-box{background:#1c1917;border:1px solid #78350f;border-radius:10px;padding:20px;margin-top:16px;border-left:4px solid #f59e0b}
+.paes-title{font-size:13px;font-weight:700;color:#f59e0b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.paes-q{font-size:15px;color:#e2e8f0;line-height:1.6;margin-bottom:16px}
+.paes-opts{display:grid;grid-template-columns:1fr;gap:8px}
+.popt{background:#0f1117;border:1px solid #292524;border-radius:6px;padding:12px 16px;font-size:14px;color:#cbd5e1;cursor:pointer;text-align:left;transition:all .15s}
+.popt:hover{background:#292524}
+.popt.correct{background:#052e16!important;border-color:#16a34a!important;color:#86efac!important}
+.popt.wrong{background:#2d0000!important;border-color:#b91c1c!important;color:#fca5a5!important}
+
+/* COLORES EJES */
+.ondas .seg-badge{background:#0c1a2e;color:#7dd3fc}
+.ondas .part{background:#0a1520;border:1px solid #1e3a5f}
+.ondas .part-label{color:#38bdf8}
+
+.mec .seg-badge{background:#052e16;color:#86efac}
+.mec .part{background:#031a0d;border:1px solid #14532d}
+.mec .part-label{color:#4ade80}
+
+.tierra .seg-badge{background:#2d1000;color:#fdba74}
+.tierra .part{background:#1c0a00;border:1px solid #7c2d12}
+.tierra .part-label{color:#fb923c}
+
+.elec .seg-badge{background:#2d1b4e;color:#c4b5fd}
+.elec .part{background:#1a0f2e;border:1px solid #4c1d95}
+.elec .part-label{color:#a78bfa}
+
+/* QUIZ SPRINT */
+.quiz-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* RESPUESTAS */
+#s-resp{background:#0f1117}
+.ans-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ans-card{border-radius:10px;padding:16px 18px;border:1px solid #334155;background:#13192a}
+.ans-card h3{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;color:#38bdf8}
+.ans-card p, .ans-card li{font-size:13px;line-height:1.6;color:#cbd5e1;margin-bottom:6px}
+
+/* BOTONES */
+.rev-btn{font-size:12px;background:#1e293b;border:none;color:#94a3b8;padding:6px 14px;border-radius:5px;cursor:pointer;margin-top:10px;font-weight:600}
+.rev-btn:hover{background:#334155;color:#fff}
+.rev-ans{display:none;margin-top:10px;font-size:14px;line-height:1.6;padding:12px 16px;border-radius:6px;background:#1e293b;color:#e2e8f0;border-left:3px solid #3b82f6}
+
+/* NAV */
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:#090c12;border-top:1px solid #1e293b;z-index:100}
+nav button{background:#1e293b;border:none;color:#94a3b8;padding:8px 20px;border-radius:6px;font-size:14px;cursor:pointer;font-weight:600}
+nav button:hover{background:#334155;color:#fff}
+nav button:disabled{opacity:.3;cursor:default}
+.counter{font-size:13px;color:#475569;font-weight:600}
+.dots{display:flex;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:#1e293b;cursor:pointer;transition:background .2s}
+.dot.active{background:#94a3b8}
+.hint{position:fixed;top:16px;right:20px;font-size:11px;color:#475569}
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="slide active" id="s0">
+  <div class="big">El Laboratorio Cero</div>
+  <div class="sub">Método Científico, Unidades y Magnitudes</div>
+  <div class="context">Para hackear la PAES de Física no basta con saber fórmulas. El 40% de la prueba evalúa si sabes <b>aislar variables, medir en las unidades correctas y distinguir flechas (vectores) de números (escalares)</b>. Hoy no son alumnos, son "Revisores Pares". Van a auditar experimentos y luego enfrentarse a preguntas reales de la PAES.</div>
+  <div class="tag">Común y Mención · Habilidades Científicas</div>
+</div>
+
+<!-- ONDAS -->
+<div class="slide ondas" id="s1">
+  <div class="seg-bar"><span class="seg-badge">Estación 1: Ondas</span><span class="seg-time">El misterio del Prisma</span></div>
+  <h2>Auditoría de Experimento 1</h2>
+  
+  <div class="parts" style="grid-template-columns:1fr 1fr;">
+    <div class="part">
+      <div class="part-label">El Experimento (Contexto)</div>
+      <p>Unos estudiantes hacen pasar luz blanca hacia prismas de distinto material (transparente, verde translúcido y rojo translúcido). Ponen una pantalla blanca a una distancia fija y anotan qué colores de luz logran cruzar (transmitirse) y llegar a la pantalla.</p>
+    </div>
+    <div class="part">
+      <div class="part-label">Misión de Auditoría (Hilo Conductor)</div>
+      <ul>
+        <li><b>Método:</b> Identifica la Variable Independiente (la causa) y la Dependiente (el efecto).</li>
+        <li><b>Vectores:</b> El haz de luz viaja en línea recta hacia la pantalla. ¿Ese viaje se representa con un vector o un escalar? ¿Por qué?</li>
+        <li><b>Unidades:</b> Si la distancia fija a la pantalla es 50 cm, ¿cuál es su valor en la unidad fundamental del Sistema Internacional (SI)?</li>
+      </ul>
+      <button class="rev-btn" onclick="toggle('rev1')">Ver Auditoría</button>
+      <div class="rev-ans" id="rev1"><b>Indep:</b> Tipo/Color de Prisma. <b>Dep:</b> Color transmitido a la pantalla. <br><b>Vectores:</b> El desplazamiento del rayo es Vectorial (tiene dirección desde el prisma a la pantalla). <br><b>Unidad:</b> 0,5 metros (SI).</div>
+    </div>
+  </div>
+
+  <div class="paes-box">
+    <div class="paes-title">⚡ Pregunta Oficial PAES (Común)</div>
+    <div class="paes-q">Considerando el experimento anterior, ¿cuál de las siguientes hipótesis es acorde con el procedimiento realizado por el grupo de estudiantes?</div>
+    <div class="paes-opts" id="q1-opts">
+      <button class="popt" onclick="ans(1, 0, this)">A) La distancia de la pantalla a los prismas afecta a la luz que incide en estos.</button>
+      <button class="popt" onclick="ans(1, 1, this)">B) El material del prisma influye en la incidencia de la luz en él.</button>
+      <button class="popt" onclick="ans(1, 2, this)">C) La luz blanca está compuesta por rayos monocromáticos.</button>
+      <button class="popt" onclick="ans(1, 3, this)">D) El color del prisma influye en la luz que este transmite.</button>
+    </div>
+    <div class="rev-ans" id="exp1" style="background:#052e16;color:#86efac;border-color:#16a34a"><b>Correcto (D):</b> Una hipótesis DEBE relacionar la variable independiente (color/tipo de prisma) con la dependiente (luz transmitida que llega a la pantalla). Las otras opciones mencionan variables controladas (distancia) o teorías ajenas al diseño.</div>
+  </div>
+</div>
+
+<!-- MECANICA -->
+<div class="slide mec" id="s2">
+  <div class="seg-bar"><span class="seg-badge">Estación 2: Mecánica</span><span class="seg-time">El dilema del Roce</span></div>
+  <h2>Auditoría de Experimento 2</h2>
+  
+  <div class="parts" style="grid-template-columns:1fr 1fr;">
+    <div class="part">
+      <div class="part-label">El Experimento (Contexto)</div>
+      <p>Un estudiante deja caer un bloque desde lo alto de un plano inclinado muy largo. Mide con un cronómetro cuánto tarda en llegar abajo. Luego repite el mismo proceso, pero recubriendo la superficie del plano con distintos materiales (madera, lija, hielo).</p>
+    </div>
+    <div class="part">
+      <div class="part-label">Misión de Auditoría (Hilo Conductor)</div>
+      <ul>
+        <li><b>Vectores:</b> La fuerza que ejerce la superficie sobre el bloque para frenarlo, ¿es escalar o vectorial? Dibuja mentalmente su dirección y sentido.</li>
+        <li><b>Unidades:</b> Si calculamos esa fuerza, ¿en qué unidad del SI se expresa y a qué equivale desglosada ($kg, m, s$)?</li>
+        <li><b>Método:</b> Nombra al menos dos variables controladas que el estudiante NO debe tocar para que el experimento sea válido.</li>
+      </ul>
+      <button class="rev-btn" onclick="toggle('rev2')">Ver Auditoría</button>
+      <div class="rev-ans" id="rev2"><b>Vectores:</b> Es Vectorial (Roce). Su dirección es paralela al plano y su sentido es OPUESTO al deslizamiento. <br><b>Unidad:</b> Newton ($N$), que equivale a $kg \cdot m/s^2$. <br><b>Controladas:</b> Masa del bloque, ángulo de inclinación, fuerza de empuje inicial.</div>
+    </div>
+  </div>
+
+  <div class="paes-box">
+    <div class="paes-title">⚡ Pregunta Oficial PAES (Común)</div>
+    <div class="paes-q">Al respecto del experimento descrito, ¿cuál de las siguientes fuerzas se asocia directamente con la <b>variable independiente</b> del procedimiento?</div>
+    <div class="paes-opts" id="q2-opts">
+      <button class="popt" onclick="ans(2, 0, this)">A) La fuerza peso.</button>
+      <button class="popt" onclick="ans(2, 1, this)">B) La fuerza normal.</button>
+      <button class="popt" onclick="ans(2, 2, this)">C) La fuerza de roce.</button>
+      <button class="popt" onclick="ans(2, 3, this)">D) La fuerza aplicada.</button>
+    </div>
+    <div class="rev-ans" id="exp2" style="background:#052e16;color:#86efac;border-color:#16a34a"><b>Correcto (C):</b> La variable independiente es la que YO manipulo. El estudiante manipula el material de la superficie. El material de las superficies en contacto determina exclusivamente el coeficiente de fricción, afectando la Fuerza de Roce.</div>
+  </div>
+</div>
+
+<!-- TIERRA -->
+<div class="slide tierra" id="s3">
+  <div class="seg-bar"><span class="seg-badge">Estación 3: Tierra</span><span class="seg-time">Rastreando el Volcán</span></div>
+  <h2>Auditoría de Experimento 3</h2>
+  
+  <div class="parts" style="grid-template-columns:1fr 1fr;">
+    <div class="part">
+      <div class="part-label">El Experimento (Contexto)</div>
+      <p>Tras la erupción del volcán Chaitén (2008), unos científicos van al terreno un mes después. Quieren estudiar el material sólido (piroclástico) que el volcán expulsó y que ahora yace en el suelo en distintos kilómetros a la redonda.</p>
+    </div>
+    <div class="part">
+      <div class="part-label">Misión de Auditoría (Hilo Conductor)</div>
+      <ul>
+        <li><b>Método:</b> Si un científico anota: <i>"Las rocas a 1 km pesan 10 kg, a 5 km pesan 2 kg"</i>, ¿cuál es la variable dependiente?</li>
+        <li><b>Vectores:</b> El "material expulsado" salió volando desde el cráter con una velocidad de 200 m/s con un ángulo de 45° hacia arriba. ¿Esa velocidad es un vector o escalar?</li>
+        <li><b>Hipótesis:</b> Redacta una hipótesis que relacione la masa de la roca con la distancia de vuelo.</li>
+      </ul>
+      <button class="rev-btn" onclick="toggle('rev3')">Ver Auditoría</button>
+      <div class="rev-ans" id="rev3"><b>Dep:</b> El peso (o masa) de la roca. <br><b>Vectores:</b> Vectorial, porque tiene magnitud (200), dirección (45°) y sentido (hacia arriba/afuera). <br><b>Hipótesis:</b> "A mayor distancia del cráter, menor será la masa de la roca volcánica encontrada".</div>
+    </div>
+  </div>
+
+  <div class="paes-box">
+    <div class="paes-title">⚡ Pregunta Oficial PAES (Común)</div>
+    <div class="paes-q">Al respecto del contexto, ¿cuál de las siguientes hipótesis podrían someter a prueba los científicos <b>en su exploración actual en terreno</b>?</div>
+    <div class="paes-opts" id="q3-opts">
+      <button class="popt" onclick="ans(3, 0, this)">A) El ritmo de subducción en la región ha aumentado.</button>
+      <button class="popt" onclick="ans(3, 1, this)">B) Las grietas en el suelo se forman en los alrededores del volcán.</button>
+      <button class="popt" onclick="ans(3, 2, this)">C) El tamaño de las rocas volcánicas es mayor en las cercanías que en lugares alejados.</button>
+      <button class="popt" onclick="ans(3, 3, this)">D) La temperatura de la cámara magmática del volcán es mayor que la de otros volcanes.</button>
+    </div>
+    <div class="rev-ans" id="exp3" style="background:#052e16;color:#86efac;border-color:#16a34a"><b>Correcto (C):</b> Una hipótesis debe ser medible con el procedimiento disponible. Si están caminando recogiendo material piroclástico expulsado en la superficie, medir el tamaño vs distancia es lo único viable ahí. No pueden medir el ritmo de subducción ni la cámara magmática con ese diseño.</div>
+  </div>
+</div>
+
+<!-- ELECTRICIDAD -->
+<div class="slide elec" id="s4">
+  <div class="seg-bar"><span class="seg-badge">Estación 4: Electricidad</span><span class="seg-time">El Misterio del Grafito</span></div>
+  <h2>Auditoría de Experimento 4</h2>
+  
+  <div class="parts" style="grid-template-columns:1fr 1fr;">
+    <div class="part">
+      <div class="part-label">El Experimento (Contexto)</div>
+      <p>Un laboratorio dispone de 10 barras de grafito de igual ancho pero distinta longitud. Quieren probar si existe una relación matemática entre la Resistencia Eléctrica del material y qué tan larga es la barra.</p>
+    </div>
+    <div class="part">
+      <div class="part-label">Misión de Auditoría (Hilo Conductor)</div>
+      <ul>
+        <li><b>Magnitudes:</b> La Resistencia Eléctrica y la Longitud de la barra, ¿son magnitudes escalares o vectoriales? ¿Por qué?</li>
+        <li><b>Unidades:</b> Nombra las unidades del Sistema Internacional (SI) para la Resistencia y la Longitud.</li>
+        <li><b>Método:</b> Si la barra es más larga, ¿la resistencia debería subir o bajar? (Piensa: ¿cuesta más caminar por un túnel corto o por uno largo?)</li>
+      </ul>
+      <button class="rev-btn" onclick="toggle('rev4')">Ver Auditoría</button>
+      <div class="rev-ans" id="rev4"><b>Magnitudes:</b> Ambas son Escalares. Un cable de 1 metro no tiene "dirección espacial", ni la resistencia de 10 Ohms tiene flecha. <br><b>Unidades:</b> Ohms ($\Omega$) y Metros ($m$). <br><b>Concepto:</b> A mayor longitud, mayor resistencia (chocan con más átomos).</div>
+    </div>
+  </div>
+
+  <div class="paes-box">
+    <div class="paes-title">⚡ Pregunta Oficial PAES (Común)</div>
+    <div class="paes-q">Además del instrumento que mide la resistencia eléctrica, ¿cuál de los siguientes materiales es <b>suficiente y necesario</b> para establecer la relación entre ambas variables?</div>
+    <div class="paes-opts" id="q4-opts">
+      <button class="popt" onclick="ans(4, 0, this)">A) Una regla</button>
+      <button class="popt" onclick="ans(4, 1, this)">B) Una batería</button>
+      <button class="popt" onclick="ans(4, 2, this)">C) Una ampolleta</button>
+      <button class="popt" onclick="ans(4, 3, this)">D) Un amperímetro</button>
+    </div>
+    <div class="rev-ans" id="exp4" style="background:#052e16;color:#86efac;border-color:#16a34a"><b>Correcto (A):</b> Para correlacionar dos variables (Resistencia y Longitud), necesitas medir ambas. Ya tienes el instrumento para la resistencia (ohmetro). Te falta medir la longitud física de la barra, y para eso basta con una simple regla.</div>
+  </div>
+</div>
+
+<!-- SPRINT MENCION -->
+<div class="slide" id="s5">
+  <div class="seg-bar"><span class="seg-badge" style="background:#475569;color:#e2e8f0">Sprint Final</span><span class="seg-time">Módulo Mención (4 Preguntas Oficiales)</span></div>
+  <h2>El Desafío de Variables (Mención)</h2>
+  <div class="quiz-grid">
+    
+    <!-- Mención Ondas -->
+    <div class="paes-box" style="margin-top:0">
+      <div class="paes-title" style="color:#7dd3fc">Ondas</div>
+      <div class="paes-q" style="font-size:14px">Estudiantes observan interferencia láser al iluminar un papel con dos rendijas muy finas. Si modifican el experimento y quieren asegurar que <b>aún se vea interferencia</b>, ¿de qué es indispensable que se aseguren?</div>
+      <div class="paes-opts" id="qm1-opts">
+        <button class="popt" onclick="ans('m1', 0, this)" style="padding:8px;font-size:13px">A) Que la distancia entre rendijas sea similar.</button>
+        <button class="popt" onclick="ans('m1', 1, this)" style="padding:8px;font-size:13px">B) Usar láser de igual intensidad.</button>
+        <button class="popt" onclick="ans('m1', 2, this)" style="padding:8px;font-size:13px">C) Usar láser del mismo color.</button>
+      </div>
+      <div class="rev-ans" id="expm1" style="background:#052e16;color:#86efac;border-color:#16a34a;font-size:12px"><b>Correcto (A):</b> La difracción/interferencia requiere que la distancia entre rendijas ($d$) sea muy pequeña, del orden de magnitud de la longitud de onda ($\lambda$). Si se separan mucho, el patrón desaparece geométricamente. El color (C) puede cambiar y se verá igual, solo con otro ancho.</div>
+    </div>
+
+    <!-- Mención Mecánica -->
+    <div class="paes-box" style="margin-top:0">
+      <div class="paes-title" style="color:#86efac">Mecánica</div>
+      <div class="paes-q" style="font-size:14px">Dos bloques distintos apilados se empujan sobre un piso. Luego se intercambian (el de arriba pasa abajo) y se empujan con misma velocidad inicial. Frenan en distancias distintas. ¿Cuál variable causó esto?</div>
+      <div class="paes-opts" id="qm2-opts">
+        <button class="popt" onclick="ans('m2', 0, this)" style="padding:8px;font-size:13px">A) Dimensiones.</button>
+        <button class="popt" onclick="ans('m2', 1, this)" style="padding:8px;font-size:13px">B) Masas.</button>
+        <button class="popt" onclick="ans('m2', 2, this)" style="padding:8px;font-size:13px">C) Materiales de los cuerpos.</button>
+      </div>
+      <div class="rev-ans" id="expm2" style="background:#052e16;color:#86efac;border-color:#16a34a;font-size:12px"><b>Correcto (C):</b> La masa total (Normal) no cambió porque son los mismos cuerpos apilados. Lo único que cambió fue <b>qué material está frotando contra el piso</b>. El coeficiente de roce dinámico ($\mu$) depende exclusivamente de los materiales en contacto.</div>
+    </div>
+
+    <!-- Mención Tierra -->
+    <div class="paes-box" style="margin-top:0">
+      <div class="paes-title" style="color:#fbbf24">Tierra</div>
+      <div class="paes-q" style="font-size:14px">La cordillera de los Andes en el Norte Chico es notoriamente MÁS ALTA que en el sur. ¿Cuál de estas opciones es una hipótesis geológica válida para explicar esta diferencia?</div>
+      <div class="paes-opts" id="qm3-opts">
+        <button class="popt" onclick="ans('m3', 0, this)" style="padding:8px;font-size:13px">A) Hay lagunas sísmicas allí.</button>
+        <button class="popt" onclick="ans('m3', 1, this)" style="padding:8px;font-size:13px">B) Más volcanes activos en el sur.</button>
+        <button class="popt" onclick="ans('m3', 2, this)" style="padding:8px;font-size:13px">C) El ángulo de subducción de Nazca es menor en el Norte Chico.</button>
+      </div>
+      <div class="rev-ans" id="expm3" style="background:#052e16;color:#86efac;border-color:#16a34a;font-size:12px"><b>Correcto (C):</b> Al tener un ángulo menor ("Flat Slab"), la placa de Nazca roza más lejos hacia el interior del continente, impidiendo la subida de magma (no hay volcanes ahí) y transfiriendo todo el esfuerzo en engrosar y levantar enormemente la corteza (Cordillera muy alta).</div>
+    </div>
+
+    <!-- Mención Elec -->
+    <div class="paes-box" style="margin-top:0">
+      <div class="paes-title" style="color:#c4b5fd">Electricidad</div>
+      <div class="paes-q" style="font-size:14px">Ampolleta Incandescente = 5% energía en luz. Ampolleta LED = 50% energía en luz. ¿Cuál es una conclusión lógica y coherente de este texto?</div>
+      <div class="paes-opts" id="qm4-opts">
+        <button class="popt" onclick="ans('m4', 0, this)" style="padding:8px;font-size:13px">A) LED permite mayor iluminación por hogar.</button>
+        <button class="popt" onclick="ans('m4', 1, this)" style="padding:8px;font-size:13px">B) LED consume más electricidad para iluminar lo mismo.</button>
+        <button class="popt" onclick="ans('m4', 2, this)" style="padding:8px;font-size:13px">C) Cambiar a LED de similar luz significa un ahorro eléctrico.</button>
+      </div>
+      <div class="rev-ans" id="expm4" style="background:#052e16;color:#86efac;border-color:#16a34a;font-size:12px"><b>Correcto (C):</b> Eficiencia. Si la LED entrega un 50% de luz frente a un 5%, significa que para lograr los <i>mismos lúmenes</i>, la LED necesita 10 veces menos energía total (Joules). Eso es directamente un ahorro de consumo eléctrico.</div>
+    </div>
+
+  </div>
+</div>
+
+<nav>
+  <button id="btn-prev" onclick="move(-1)" disabled>← Anterior</button>
+  <div style="display:flex;align-items:center;gap:18px">
+    <div class="dots" id="dots"></div>
+    <span class="counter" id="counter">1 / 6</span>
+  </div>
+  <button id="btn-next" onclick="move(1)">Siguiente →</button>
+</nav>
+<div class="hint">← → para navegar</div>
+
+<script>
+// NAVEGACION
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+const dotsEl = document.getElementById('dots');
+
+for(let i=0; i<total; i++){
+  const d = document.createElement('div');
+  d.className = 'dot' + (i===0 ? ' active' : '');
+  d.onclick = () => go(i);
+  dotsEl.appendChild(d);
+}
+
+function go(n){
+  slides[cur].classList.remove('active');
+  dotsEl.children[cur].classList.remove('active');
+  cur = Math.max(0, Math.min(n, total-1));
+  slides[cur].classList.add('active');
+  dotsEl.children[cur].classList.add('active');
+  document.getElementById('counter').textContent = (cur+1) + ' / ' + total;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === total-1;
+  window.scrollTo(0,0);
+}
+
+function move(d){ go(cur+d); }
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowRight') move(1);
+  if(e.key === 'ArrowLeft') move(-1);
+});
+
+function toggle(id){
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+// RESPUESTAS QUIZ Y PAES
+function ans(q, selected, btn) {
+  // Claves de respuesta
+  const keys = {
+    1: 3, // D
+    2: 2, // C
+    3: 2, // C
+    4: 0, // A
+    'm1': 0, // A
+    'm2': 2, // C
+    'm3': 2, // C
+    'm4': 2  // C
+  };
+  
+  const correct = keys[q];
+  const container = document.getElementById('q' + q + '-opts');
+  const buttons = container.querySelectorAll('.popt');
+  
+  buttons.forEach((b, j) => {
+    b.disabled = true;
+    if (j === correct) {
+      b.classList.add('correct');
+    } else if (j === selected) {
+      b.classList.add('wrong');
+    }
+  });
+  
+  document.getElementById('exp' + q).style.display = 'block';
+}
+</script>
+</body>
+</html>
